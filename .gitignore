@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+
+.env
+
+# Generated artefacts — rebuild them with the setup steps in README.md
+data/synthetic_patients.csv
+model/model.joblib
+model/feature_columns.json
+knowledge_base/chroma_db/
+*.db
+
+.DS_Store

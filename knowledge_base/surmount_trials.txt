@@ -1,0 +1,61 @@
+SURMOUNT-1 TRIAL - TIRZEPATIDE (GIP/GLP-1 DUAL AGONIST) - NON-DIABETIC ADULTS
+Source: Jastreboff AM et al. N Engl J Med. 2022;387:205-216 (NCT04184622)
+Population: Adults with obesity or overweight, no type 2 diabetes
+Mean baseline BMI 38. 40% had prediabetes. Mean baseline HbA1c 5.6%.
+Duration: 72 weeks. Doses: 5mg, 10mg, 15mg once weekly subcutaneous.
+
+PRIMARY ENDPOINTS (efficacy estimand)
+Tirzepatide 5mg: mean -16.0% body weight
+Tirzepatide 10mg: mean -21.4% body weight
+Tirzepatide 15mg: mean -22.5% body weight
+Placebo: mean -2.4% body weight
+
+CONFIRMED SECONDARY ENDPOINTS AT WEEK 72
+HbA1c: mean 0.5% decrease across tirzepatide groups despite non-diabetic baseline
+More than 95% of participants with prediabetes reverted to normoglycemia
+Triglycerides: decreased more than 27% in pooled tirzepatide vs 6.3% placebo
+Waist circumference at 72 weeks (15mg): approximately -19 cm
+Source: PMC12381612 post-hoc SURMOUNT-1 and SURMOUNT-3 analysis
+Body composition: fat mass reduced 33.9% vs lean mass reduced 10.9%
+(approximately 3x greater fat reduction than lean mass reduction)
+Blood pressure, lipids, waist circumference: all significantly improved vs placebo
+
+METABOLIC IMPROVEMENTS INDEPENDENT OF SCALE WEIGHT
+Source: Annals of Internal Medicine post-hoc SURMOUNT analysis
+doi: 10.7326/annals-24-02623
+HOMA-IR (insulin resistance) and HbA1c begin improving even with modest weight loss.
+The steepest metabolic improvement occurs between 5% and 20% weight reduction.
+This means insulin sensitivity is improving before the scale fully reflects
+the medication's effects. A plateau on the scale does not mean insulin
+sensitivity has stopped improving.
+
+SURMOUNT-4 TRIAL - TIRZEPATIDE WITHDRAWAL AND MAINTENANCE
+Source: Aronne LJ et al. JAMA. 2024;331(1):38-48 (NCT04660643)
+Design: 36-week open-label lead-in (all received tirzepatide 10mg or 15mg),
+then randomized 1:1 to continue tirzepatide or switch to placebo for 52 weeks.
+670 participants completed lead-in. Mean age 48, 71% women.
+
+LEAD-IN RESULTS (36 weeks, all patients)
+Mean weight reduction: -20.9%
+
+RANDOMIZED PERIOD (week 36 to week 88)
+Continued tirzepatide: additional -5.5% weight reduction
+Switched to placebo: +14.0% weight gain
+Total at week 88: -25.3% (continued) vs -9.9% (placebo)
+89.5% of continued tirzepatide patients maintained at least 80% of lead-in loss
+Only 16.6% of placebo patients maintained at least 80% of lead-in loss
+
+CARDIOMETABOLIC REVERSAL ON STOPPING
+Source: Horn DB et al. JAMA Intern Med. Published November 24, 2025
+Most patients who stopped tirzepatide regained more than 25% of body weight
+within one year. This degree of regain was associated with significant reversal
+of cardiometabolic improvements including waist circumference, non-HDL
+cholesterol, and fasting insulin. Patients who maintained weight reduction
+below 25% regain largely preserved their cardiometabolic gains.
+
+KEY CLINICAL INSIGHT FOR PLATEAUED PATIENTS
+A scale plateau during active treatment is entirely different from what happens
+after stopping the drug. Patients who stay on therapy through a plateau preserve
+their metabolic gains. Patients who stop lose them, and most regain the majority
+of their weight within a year. Staying on through discouragement is not just
+psychologically important. It is clinically protective.

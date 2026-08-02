@@ -1,0 +1,63 @@
+STEP 1 TRIAL - SEMAGLUTIDE 2.4mg ONCE WEEKLY - NON-DIABETIC ADULTS WITH OBESITY
+Source: Wilding JPH et al. N Engl J Med. 2021;384:989-1002 (NCT03548935)
+Population: 1,961 adults, no type 2 diabetes, mean BMI 37.9, mean age 46, 74% women
+Duration: 68 weeks
+
+PRIMARY ENDPOINT
+Mean body weight change: -14.9% (semaglutide) vs -2.4% (placebo)
+Proportion achieving at least 5% weight loss: 86.4% semaglutide vs 31.5% placebo
+Proportion achieving at least 10% weight loss: 69%
+Proportion achieving at least 15% weight loss: 50%
+Proportion achieving at least 20% weight loss: 32%
+
+CONFIRMED SECONDARY ENDPOINTS AT WEEK 68
+Waist circumference change: -13.54 cm (semaglutide) vs -4.13 cm (placebo)
+Estimated treatment difference: -9.42 cm (95% CI -10.30 to -8.53)
+ClinicalTrials.gov NCT03548935 results: -14.1 plus or minus 9.6 cm (semaglutide)
+
+C-reactive protein (CRP, inflammation marker):
+Reduced by 44% vs placebo (estimated treatment difference -44%, 95% CI -49 to -39)
+Source: Wadden et al. PMC9713290, STEP 1/2/3 CRP analysis
+
+Systolic blood pressure, HbA1c, fasting lipids: all significantly improved vs placebo
+Physical functioning (SF-36 v2): significantly improved vs placebo
+Body composition (DXA subpopulation): fat mass reduced more than lean mass
+
+CLINICAL INSIGHT FOR WEIGHT PLATEAU PATIENTS
+The scale is one signal among many. During plateau periods, waist circumference,
+blood pressure, and CRP continue to respond to semaglutide even when scale
+weight is stable. A 9.42 cm average waist reduction over 68 weeks does not
+happen in a straight line. Plateau on the scale does not mean plateau in
+visceral fat or cardiovascular risk markers.
+
+STEP 4 TRIAL - SEMAGLUTIDE WITHDRAWAL AND MAINTENANCE
+Source: Rubino D et al. JAMA. 2021;325(14):1414-1425 (NCT03548987)
+Design: 20-week open-label run-in (all received semaglutide 2.4mg),
+then randomized 2:1 to continue semaglutide (n=535) or switch to placebo (n=268)
+for 48 additional weeks. 73 sites across 10 countries.
+
+WEIGHT OUTCOMES (week 20 to week 68)
+Continued semaglutide: additional -7.9% body weight
+Switched to placebo: +6.9% body weight regain
+Estimated treatment difference: -14.8 percentage points (95% CI -16.0 to -13.5)
+Total at week 68: -17.4% (continued semaglutide) vs -5.0% (switched to placebo)
+
+CARDIOMETABOLIC OUTCOMES (week 20 to week 68)
+Waist circumference: mean treatment difference -9.7 cm (95% CI -10.9 to -8.5)
+Systolic blood pressure: remained stable in continued semaglutide group,
+increased in placebo group. Mean difference: -3.9 mmHg (95% CI -5.8 to -2.0)
+
+KEY CLINICAL INSIGHT FOR PLATEAUED PATIENTS
+Patients who reached the maintenance dose and stopped semaglutide lost most
+of their cardiometabolic gains. Patients who continued therapy maintained and
+extended them. Staying on the drug through a scale plateau is clinically
+meaningful. The cardiometabolic benefits of staying on are real and measurable
+even when weight is temporarily stable.
+
+STEP 1 EXTENSION - ONE YEAR AFTER STOPPING
+Source: Rubino S et al. Diabetes Obes Metab. 2022 (PMC9542252). n=327 participants.
+After stopping semaglutide at week 68:
+Weight regained by week 120: mean 11.6 percentage points (SD 7.7)
+Net loss from baseline at week 120: -5.6% (SD 8.9%)
+Approximately two-thirds of weight lost was regained within 1 year of stopping.
+Cardiometabolic improvements reverted toward baseline values.
