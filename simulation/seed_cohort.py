@@ -117,7 +117,7 @@ def seed(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Seed a GoalPost¹ cohort.")
+    parser = argparse.ArgumentParser(description="Seed a GoaLPost¹ cohort.")
     parser.add_argument("--patients", type=int, default=DEFAULT_PATIENTS)
     parser.add_argument(
         "--reset", action="store_true", help="Drop every table before seeding."

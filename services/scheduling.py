@@ -1,4 +1,4 @@
-"""The clock for GoalPost¹.
+"""The clock for GoaLPost¹.
 
 Two entry points drive every contact decision in the system:
 
@@ -418,7 +418,7 @@ def _silent_since(patient: Patient) -> Optional[datetime]:
 
     Falls back to enrollment rather than therapy start: a patient seeded at
     week 30 has been on therapy for months but has only been reachable by
-    GoalPost¹ since they enrolled.
+    GoaLPost¹ since they enrolled.
     """
     return patient.last_reply_at or patient.enrolled_at
 

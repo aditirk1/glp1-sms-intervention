@@ -1,4 +1,4 @@
-"""ORM models for GoalPost¹.
+"""ORM models for GoaLPost¹.
 
 Patient and CheckIn hold the clinical record. OutboundMessage, Task and
 RiskSnapshot exist so the scheduler can work at cohort scale: they let the

@@ -1,7 +1,7 @@
 """Cohort-level metrics and the retention curve.
 
 Retention is measured from enrollment rather than from therapy start. Patients
-join GoalPost¹ at different points in their treatment, so weeks-since-enrolled
+join GoaLPost¹ at different points in their treatment, so weeks-since-enrolled
 is the only axis on which every patient is comparable and on which the two
 simulation arms line up.
 """

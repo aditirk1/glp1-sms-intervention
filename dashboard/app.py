@@ -1,4 +1,4 @@
-"""GoalPost¹ care team dashboard.
+"""GoaLPost¹ care team dashboard.
 
 Ordered by what a care team actually does with it. The work queue comes first
 because it is the only part that asks for someone's time; the cohort view and
@@ -30,7 +30,7 @@ TASK_LABELS = {
 
 TIER_COLOURS = {"red": "#b91c1c", "amber": "#c2410c", "green": "#15803d"}
 
-st.set_page_config(page_title="GoalPost¹", page_icon="signal", layout="wide")
+st.set_page_config(page_title="GoaLPost¹", page_icon="signal", layout="wide")
 
 
 # ----------------------------------------------------------------- transport
@@ -70,14 +70,14 @@ def _percent(value) -> str:
 
 # -------------------------------------------------------------------- header
 
-st.title("GoalPost¹")
+st.title("GoaLPost¹")
 st.caption("Autonomous GLP-1 check-in engine — risk-stratified cadence, "
            "declarative intervention policy, care team work queue")
 
 metrics = api_get("/cohort/metrics")
 
 if metrics is None:
-    st.error(f"Could not reach the GoalPost¹ API at {API_BASE_URL}.")
+    st.error(f"Could not reach the GoaLPost¹ API at {API_BASE_URL}.")
     st.code("uvicorn api.main:app --reload --port 8000")
     st.stop()
 

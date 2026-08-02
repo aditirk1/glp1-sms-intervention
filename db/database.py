@@ -1,4 +1,4 @@
-"""SQLAlchemy engine, session factory and declarative base for GoalPost¹."""
+"""SQLAlchemy engine, session factory and declarative base for GoaLPost¹."""
 
 import os
 
@@ -8,7 +8,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./GoalPost¹.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./GoaLPost¹.db")
 
 # check_same_thread is a SQLite-only flag; FastAPI serves requests from a
 # thread pool and would otherwise refuse to reuse the connection.

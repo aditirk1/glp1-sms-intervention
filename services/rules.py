@@ -1,4 +1,4 @@
-"""Declarative intervention policy for GoalPost¹.
+"""Declarative intervention policy for GoaLPost¹.
 
 Every decision about what to send and when to involve a human lives in RULES
 below, so the policy can be read end to end without tracing control flow. The

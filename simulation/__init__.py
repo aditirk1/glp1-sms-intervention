@@ -1,1 +1,1 @@
-"""Cohort simulation harness for GoalPost¹."""
+"""Cohort simulation harness for GoaLPost¹."""

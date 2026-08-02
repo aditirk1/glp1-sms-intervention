@@ -36,7 +36,7 @@ def main() -> None:
     with TestClient(app) as client:
         print("\nroot")
         root = client.get("/").json()
-        check("API responds", root.get("status", "").startswith("GoalPost"))
+        check("API responds", root.get("status", "").startswith("GoaLPost"))
 
         print("\nenrollment")
         created = client.post(

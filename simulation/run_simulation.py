@@ -34,7 +34,7 @@ WEEKLY_SEND_CAP = 2
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run a GoalPost¹ cohort simulation.")
+    parser = argparse.ArgumentParser(description="Run a GoaLPost¹ cohort simulation.")
     parser.add_argument("--arm", choices=["control", "intervention"], required=True)
     parser.add_argument("--patients", type=int, default=DEFAULT_PATIENTS)
     parser.add_argument("--weeks", type=int, default=DEFAULT_WEEKS)

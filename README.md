@@ -1,6 +1,6 @@
-# GoalPost¹
+# GoaLPost¹
 
-GoalPost¹ is an autonomous check-in engine for obesity and type 2 diabetes patients on GLP-1 therapy. It decides on its own who to contact, when, and what to say. A risk-stratified scheduler contacts patients every 3, 7, or 14 days depending on their dropout risk; replies are scored by an XGBoost model whose SHAP attribution identifies *which* barrier is driving the risk — a weight plateau, side effects, or cost; and a declarative rules engine picks the intervention or escalates to a human. Patients who say nothing at all are treated as the highest-signal case, not as missing data.
+GoaLPost¹ is an autonomous check-in engine for obesity and type 2 diabetes patients on GLP-1 therapy. It decides on its own who to contact, when, and what to say. A risk-stratified scheduler contacts patients every 3, 7, or 14 days depending on their dropout risk; replies are scored by an XGBoost model whose SHAP attribution identifies *which* barrier is driving the risk — a weight plateau, side effects, or cost; and a declarative rules engine picks the intervention or escalates to a human. Patients who say nothing at all are treated as the highest-signal case, not as missing data.
 
 Nobody presses a button. One function decides everything:
 
@@ -119,7 +119,7 @@ python -m simulation.seed_cohort --patients 1000 --reset
 `--reset` drops and recreates every table. There is no Alembic here on purpose: the data is synthetic, so the schema is rebuilt rather than migrated. If you are upgrading an older checkout and see `no such column`, delete the database and reseed:
 
 ```bash
-rm "GoalPost¹.db" && python -m simulation.seed_cohort --patients 1000 --reset
+rm "GoaLPost¹.db" && python -m simulation.seed_cohort --patients 1000 --reset
 ```
 
 **g. Start the API**
@@ -158,7 +158,7 @@ codesign -f -s - "$SP/xgboost/lib/libxgboost.dylib"
 4. Acknowledge or resolve a task in the queue.
 5. Filter the roster by **Silent only** to see patients who are accruing risk without ever replying.
 
-Every outbound message is printed to the API console with a `[GoalPost¹ SMS]` prefix rather than sent, so you can watch the whole conversation without a carrier.
+Every outbound message is printed to the API console with a `[GoaLPost¹ SMS]` prefix rather than sent, so you can watch the whole conversation without a carrier.
 
 ## The simulation harness
 

@@ -1,4 +1,4 @@
-"""GoalPost¹ API — autonomous check-in engine for GLP-1 retention."""
+"""GoaLPost¹ API — autonomous check-in engine for GLP-1 retention."""
 
 import os
 from contextlib import asynccontextmanager
@@ -37,7 +37,7 @@ def _run_tick() -> None:
         result = scheduling.tick(db)
         if result.get("considered"):
             print(
-                f"[GoalPost¹ scheduler] considered {result['considered']}, "
+                f"[GoaLPost¹ scheduler] considered {result['considered']}, "
                 f"messaged {result['messaged']}, "
                 f"tasks {result['tasks_created']}"
             )
@@ -62,22 +62,22 @@ def _start_scheduler() -> None:
         )
         _scheduler.start()
         print(
-            f"[GoalPost¹] scheduler running every {SCHEDULER_INTERVAL_MINUTES} min"
+            f"[GoaLPost¹] scheduler running every {SCHEDULER_INTERVAL_MINUTES} min"
         )
     except Exception as exc:
         # The API is still fully usable via POST /scheduler/tick.
-        print(f"[GoalPost¹] scheduler unavailable ({exc}); use POST /scheduler/tick")
+        print(f"[GoaLPost¹] scheduler unavailable ({exc}); use POST /scheduler/tick")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_tables()
-    print("[GoalPost¹] database tables ready")
+    print("[GoaLPost¹] database tables ready")
 
     if ENABLE_SCHEDULER:
         _start_scheduler()
     else:
-        print("[GoalPost¹] in-process scheduler disabled; expecting external cron")
+        print("[GoaLPost¹] in-process scheduler disabled; expecting external cron")
 
     yield
 
@@ -86,7 +86,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="GoalPost¹ API",
+    title="GoaLPost¹ API",
     description="GLP-1 retention: risk-stratified SMS check-ins, a declarative "
     "intervention policy, and a care team work queue.",
     version="2.0.0",
@@ -112,7 +112,7 @@ app.include_router(cohort.router, prefix="")
 @app.get("/")
 def root():
     return {
-        "status": "GoalPost¹ API running",
+        "status": "GoaLPost¹ API running",
         "scheduler_enabled": ENABLE_SCHEDULER,
         "tick_endpoint": "POST /scheduler/tick",
     }

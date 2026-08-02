@@ -1,4 +1,4 @@
-"""Train the GoalPost¹ dropout-risk classifier.
+"""Train the GoaLPost¹ dropout-risk classifier.
 
 Fits an XGBoost model on the synthetic cohort, reports held-out performance,
 ranks the drivers with SHAP, and writes the artefacts the API loads at runtime.
