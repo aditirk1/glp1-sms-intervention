@@ -68,9 +68,18 @@ def risk_tier_for_score(risk_score: float) -> str:
     return "red"
 
 
+# Disengagement reads as a plateau-family signal: a patient who has stopped
+# answering is usually one who has stopped seeing a reason to.
+PLATEAU_FEATURES = (
+    "weight_change_slope",
+    "consecutive_reply_3",
+    "consecutive_no_reply",
+)
+
+
 def _barrier_for_feature(feature: str) -> str:
     """Map a SHAP feature to the barrier the care team can act on."""
-    if feature in ("weight_change_slope", "consecutive_reply_3"):
+    if feature in PLATEAU_FEATURES:
         return "plateau"
     if "gi_event_flag" in feature:
         return "side_effect"
@@ -90,21 +99,78 @@ def _is_actionable(feature: str) -> bool:
     They can dominate the SHAP ranking without pointing at anything the care
     team can do, so they are excluded when choosing the barrier.
     """
-    return _barrier_for_feature(feature) != "plateau" or feature in (
-        "weight_change_slope",
-        "consecutive_reply_3",
-    )
+    return _barrier_for_feature(feature) != "plateau" or feature in PLATEAU_FEATURES
 
 
-def _encode(patient_dict: dict, feature_columns: list) -> pd.DataFrame:
-    """One-hot encode a single patient and align it to the training columns."""
-    row = pd.DataFrame([patient_dict])
+def _encode(patient_dicts: list, feature_columns: list) -> pd.DataFrame:
+    """One-hot encode patients and align them to the training columns."""
+    frame = pd.DataFrame(patient_dicts)
     for column in CATEGORICAL_FEATURES:
-        if column not in row.columns:
-            row[column] = None
-    encoded = pd.get_dummies(row, columns=CATEGORICAL_FEATURES, drop_first=False)
+        if column not in frame.columns:
+            frame[column] = None
+    encoded = pd.get_dummies(frame, columns=CATEGORICAL_FEATURES, drop_first=False)
     # Unseen categories drop out, absent categories fill with 0, order is restored.
     return encoded.reindex(columns=feature_columns, fill_value=0).astype(float)
+
+
+def _explain_row(contributions, feature_columns: list) -> tuple:
+    """Pick the headline feature and the actionable one behind the barrier."""
+    shap_map = {
+        feature: float(value) for feature, value in zip(feature_columns, contributions)
+    }
+    top_feature = max(shap_map, key=lambda key: abs(shap_map[key]))
+
+    actionable = [f for f in shap_map if _is_actionable(f)]
+    barrier_feature = (
+        max(actionable, key=lambda key: abs(shap_map[key]))
+        if actionable
+        else top_feature
+    )
+    return shap_map, top_feature, barrier_feature
+
+
+def score_batch(patient_dicts: list) -> list:
+    """Score many patients in one pass.
+
+    A scheduler tick scores every due patient at once, and running the model
+    and the explainer per row was the dominant cost at cohort scale. Returns
+    one result dict per input, in order.
+    """
+    if not patient_dicts:
+        return []
+
+    try:
+        model, feature_columns, explainer = load_model()
+        encoded = _encode(patient_dicts, feature_columns)
+
+        probabilities = model.predict_proba(encoded)[:, 1]
+
+        values = np.asarray(explainer.shap_values(encoded))
+        if values.ndim == 3:
+            # Some SHAP/XGBoost combinations return one matrix per class.
+            values = values[..., -1]
+        values = values.reshape(len(patient_dicts), -1)[:, : len(feature_columns)]
+
+        results = []
+        for index in range(len(patient_dicts)):
+            risk_score = float(probabilities[index])
+            shap_map, top_feature, barrier_feature = _explain_row(
+                values[index], feature_columns
+            )
+            results.append(
+                {
+                    "risk_score": risk_score,
+                    "risk_tier": risk_tier_for_score(risk_score),
+                    "barrier_type": _barrier_for_feature(barrier_feature),
+                    "top_shap_feature": top_feature,
+                    "barrier_feature": barrier_feature,
+                    "shap_values": shap_map,
+                }
+            )
+        return results
+    except Exception as exc:
+        print(f"[risk_scorer] scoring failed ({exc}); returning neutral risk.")
+        return [dict(_NEUTRAL_RESULT) for _ in patient_dicts]
 
 
 def score_patient(patient_dict: dict) -> dict:
@@ -113,40 +179,4 @@ def score_patient(patient_dict: dict) -> dict:
     Returns risk_score, risk_tier, barrier_type, top_shap_feature and the full
     per-feature SHAP dict.
     """
-    try:
-        model, feature_columns, explainer = load_model()
-        encoded = _encode(patient_dict, feature_columns)
-
-        risk_score = float(model.predict_proba(encoded)[0][1])
-
-        shap_values = explainer.shap_values(encoded)
-        values = np.asarray(shap_values)
-        if values.ndim == 3:
-            # Some SHAP/XGBoost combinations return one matrix per class.
-            values = values[..., -1]
-        contributions = np.asarray(values).reshape(-1)[: len(feature_columns)]
-
-        shap_map = {
-            feature: float(value)
-            for feature, value in zip(feature_columns, contributions)
-        }
-        top_feature = max(shap_map, key=lambda key: abs(shap_map[key]))
-
-        actionable = [f for f in shap_map if _is_actionable(f)]
-        barrier_feature = (
-            max(actionable, key=lambda key: abs(shap_map[key]))
-            if actionable
-            else top_feature
-        )
-
-        return {
-            "risk_score": risk_score,
-            "risk_tier": risk_tier_for_score(risk_score),
-            "barrier_type": _barrier_for_feature(barrier_feature),
-            "top_shap_feature": top_feature,
-            "barrier_feature": barrier_feature,
-            "shap_values": shap_map,
-        }
-    except Exception as exc:
-        print(f"[risk_scorer] scoring failed ({exc}); returning neutral risk.")
-        return dict(_NEUTRAL_RESULT)
+    return score_batch([patient_dict])[0]

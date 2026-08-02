@@ -16,7 +16,10 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_CSV = PROJECT_ROOT / "data" / "synthetic_patients.csv"
 
-N_PATIENTS = 500
+# Training cohort size, independent of how many patients the simulation runs.
+# The labels are a Bernoulli draw so the achievable AUC is capped; 5000 rows
+# closes to within ~0.02 of that ceiling where 500 left ~0.09 on the table.
+N_PATIENTS = 5000
 RANDOM_SEED = 42
 
 INSURANCE_TYPES = ["commercial", "medicaid", "medicare", "uninsured"]
@@ -38,6 +41,9 @@ RISK_BUMPS = {
     "low_income": 0.08,
     "prior_pa_denial": 0.10,
     "repeat_reply_3": 0.18,
+    # Non-response is the strongest real-world dropout signal: a patient who
+    # has stopped answering has usually already stopped refilling.
+    "no_reply_streak": 0.20,
 }
 
 
@@ -76,6 +82,12 @@ def build_base_cohort(n: int, rng: np.random.Generator) -> pd.DataFrame:
         [0, 1, 2, 3, 4], size=n, p=[0.45, 0.25, 0.15, 0.10, 0.05]
     )
 
+    # Check-ins in a row the patient ignored entirely. Most people answer, and
+    # the tail that does not is where dropout concentrates.
+    consecutive_no_reply = rng.choice(
+        [0, 1, 2, 3, 4], size=n, p=[0.55, 0.22, 0.12, 0.07, 0.04]
+    )
+
     return pd.DataFrame(
         {
             "weeks_on_therapy": weeks_on_therapy,
@@ -87,6 +99,7 @@ def build_base_cohort(n: int, rng: np.random.Generator) -> pd.DataFrame:
             "prior_pa_denial": prior_pa_denial,
             "baseline_bmi": np.round(baseline_bmi, 2),
             "consecutive_reply_3": consecutive_reply_3,
+            "consecutive_no_reply": consecutive_no_reply,
         }
     )
 
@@ -128,6 +141,9 @@ def enforce_domain(df: pd.DataFrame) -> pd.DataFrame:
     df["consecutive_reply_3"] = np.clip(
         df["consecutive_reply_3"].round(), 0, 4
     ).astype(int)
+    df["consecutive_no_reply"] = np.clip(
+        df["consecutive_no_reply"].round(), 0, 4
+    ).astype(int)
     df["insurance_type"] = df["insurance_type"].where(
         df["insurance_type"].isin(INSURANCE_TYPES), "commercial"
     )
@@ -156,6 +172,9 @@ def add_labels(df: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
     )
     log_odds += (df["consecutive_reply_3"] >= 2) * _bump_to_log_odds(
         RISK_BUMPS["repeat_reply_3"]
+    )
+    log_odds += (df["consecutive_no_reply"] >= 2) * _bump_to_log_odds(
+        RISK_BUMPS["no_reply_streak"]
     )
 
     probability = np.clip(_sigmoid(log_odds), 0.05, 0.95)
@@ -194,6 +213,7 @@ def main() -> None:
         "prior_pa_denial",
         "baseline_bmi",
         "consecutive_reply_3",
+        "consecutive_no_reply",
         "dropout_probability",
         "discontinued_90d",
     ]

@@ -23,6 +23,48 @@ FALLBACK_MESSAGE = (
     "pressure."
 )
 
+# Offline messages, keyed by the week the plateau shows up. A cohort simulation
+# fires tens of thousands of plateau branches; retrieval and an LLM call on each
+# would take hours and cost money to prove a scheduling point.
+OFFLINE_MESSAGES = [
+    (
+        8,
+        "The scale can stall in the first weeks while your body is still "
+        "adjusting to the dose. In STEP 1, blood pressure had already dropped "
+        "an average of 6 points by this stage. Take your blood pressure today "
+        "and write it down.",
+    ),
+    (
+        20,
+        "A stall around this point is expected, not a setback. Trial data "
+        "shows waist circumference kept shrinking through months 4 to 6 even "
+        "when weight held flat. Measure your waist today and compare it to "
+        "where you started.",
+    ),
+    (
+        99,
+        "Later in treatment the scale moves slowly while metabolic markers "
+        "keep improving. SURMOUNT-1 participants continued lowering HbA1c and "
+        "inflammation well past the point weight levelled off. Ask your care "
+        "team for your latest HbA1c at your next visit.",
+    ),
+]
+
+_offline = False
+
+
+def set_offline(offline: bool) -> None:
+    """Serve templated messages instead of calling retrieval and the LLM."""
+    global _offline
+    _offline = offline
+
+
+def offline_message(weeks_on_therapy: int) -> str:
+    for threshold, message in OFFLINE_MESSAGES:
+        if weeks_on_therapy <= threshold:
+            return message
+    return FALLBACK_MESSAGE
+
 SYSTEM = """
 You are a supportive health coach assistant for a patient on a GLP-1
 weight loss medication. Your job is to reframe a weight loss plateau
@@ -48,6 +90,9 @@ def generate_plateau_message(
     consecutive_reply_3: int,
 ) -> str:
     """Return a 3-sentence plateau SMS grounded in retrieved trial data."""
+    if _offline:
+        return offline_message(weeks_on_therapy)
+
     try:
         trial_context = vectorstore.query_trial_data(weeks_on_therapy, "plateau")
 

@@ -29,6 +29,7 @@ NUMERIC_FEATURES = [
     "prior_pa_denial",
     "baseline_bmi",
     "consecutive_reply_3",
+    "consecutive_no_reply",
 ]
 CATEGORICAL_FEATURES = ["insurance_type", "indication"]
 TARGET = "discontinued_90d"
