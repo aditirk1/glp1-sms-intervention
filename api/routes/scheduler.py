@@ -23,13 +23,13 @@ def scheduler_tick(
     db: Session = Depends(get_db),
 ):
     """Run one scheduling pass over every patient who is due."""
-    return scheduling.tick(db, now=datetime.utcnow(), arm=arm)
+    return scheduling.tick(db, now=datetime.now(), arm=arm)
 
 
 @router.get("/scheduler/status")
 def scheduler_status(db: Session = Depends(get_db)):
     """What the next tick would pick up, without sending anything."""
-    now = datetime.utcnow()
+    now = datetime.now()
     due = scheduling.due_patients(db, now)
 
     next_due = (

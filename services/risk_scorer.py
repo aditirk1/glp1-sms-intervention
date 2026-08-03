@@ -7,7 +7,9 @@ webhook uses to pick an intervention.
 The model, feature column list and SHAP explainer are cached at module level.
 """
 
+import ctypes
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -25,6 +27,7 @@ RED_THRESHOLD = 0.60
 _model = None
 _feature_columns = None
 _explainer = None
+_libomp_loaded = False
 
 # Fired when the model artefact is missing, so the webhook still returns a
 # usable envelope instead of a 500.
@@ -38,11 +41,51 @@ _NEUTRAL_RESULT = {
 }
 
 
+def _ensure_libomp() -> None:
+    """Make OpenMP visible to XGBoost on macOS without requiring brew install.
+
+    XGBoost's dylib is linked against @rpath/libomp.dylib and ships an RPATH of
+    /opt/homebrew/opt/libomp/lib. If Homebrew never installed libomp, we point
+    that path at the copy PyTorch already ships in the venv.
+    """
+    global _libomp_loaded
+    if _libomp_loaded or os.name == "nt":
+        return
+
+    site = PROJECT_ROOT / ".venv" / "lib"
+    bundled = []
+    if site.exists():
+        bundled.extend(site.glob("python*/site-packages/torch/lib/libomp.dylib"))
+        bundled.extend(site.glob("python*/site-packages/sklearn/.dylibs/libomp.dylib"))
+
+    homebrew = Path("/opt/homebrew/opt/libomp/lib/libomp.dylib")
+    if not homebrew.exists() and bundled:
+        try:
+            homebrew.parent.mkdir(parents=True, exist_ok=True)
+            if homebrew.is_symlink() or not homebrew.exists():
+                if homebrew.exists() or homebrew.is_symlink():
+                    homebrew.unlink()
+                homebrew.symlink_to(bundled[0].resolve())
+        except OSError as exc:
+            print(f"[risk_scorer] could not link libomp into Homebrew path: {exc}")
+
+    for path in [*bundled, homebrew, Path("/usr/local/opt/libomp/lib/libomp.dylib")]:
+        if not path.exists():
+            continue
+        try:
+            ctypes.CDLL(str(path), mode=ctypes.RTLD_GLOBAL)
+            _libomp_loaded = True
+            return
+        except OSError:
+            continue
+
+
 def load_model():
     """Load and cache model.joblib, the feature column list and the explainer."""
     global _model, _feature_columns, _explainer
 
     if _model is None:
+        _ensure_libomp()
         import joblib
         import shap
 

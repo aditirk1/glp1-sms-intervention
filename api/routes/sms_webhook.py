@@ -10,6 +10,8 @@ Every path returns parseable JSON so the dashboard simulator never sees a raw
 error.
 """
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Form
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
@@ -53,7 +55,11 @@ def receive_sms(
             )
 
         result = scheduling.process_reply(
-            db, patient, reply=int(first_char), raw_message=body
+            db,
+            patient,
+            reply=int(first_char),
+            raw_message=body,
+            now=datetime.now(),
         )
         db.commit()
 

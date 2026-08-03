@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GoaLPost¹ — How it works</title>
+  <style>
+    :root {
+      --ink: #1a2332;
+      --muted: #5a6577;
+      --paper: #f7f4ef;
+      --card: #ffffff;
+      --line: #d9d2c5;
+      --accent: #0f6b5c;
+      --accent-soft: #d8efe9;
+      --warn: #b45309;
+      --warn-soft: #fef3c7;
+      --alert: #9f1239;
+      --alert-soft: #ffe4e6;
+      --ok: #166534;
+      --ok-soft: #dcfce7;
+      --amber: #c2410c;
+      --amber-soft: #ffedd5;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: #2a3140;
+      color: var(--ink);
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    }
+
+    .deck {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .slide {
+      display: none;
+      width: min(1100px, 96vw);
+      min-height: min(640px, 88vh);
+      background: var(--paper);
+      border-radius: 18px;
+      padding: 2.75rem 3.25rem;
+      box-shadow: 0 24px 60px rgba(0,0,0,.35);
+      position: relative;
+      overflow: hidden;
+    }
+    .slide.active { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 8px;
+      background: linear-gradient(180deg, var(--accent), #1d4e89);
+    }
+
+    h1 {
+      font-size: clamp(2rem, 3.4vw, 2.75rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      max-width: 18ch;
+    }
+    h2 {
+      font-size: clamp(1.55rem, 2.6vw, 2.1rem);
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+    .lede {
+      font-size: 1.2rem;
+      color: var(--muted);
+      max-width: 46ch;
+      line-height: 1.45;
+    }
+    p, li {
+      font-size: 1.05rem;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+    .muted { color: var(--muted); }
+    .small { font-size: .92rem; }
+
+    .eyebrow {
+      font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .footer {
+      margin-top: auto;
+      padding-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      font-size: .8rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+
+    .brand {
+      font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .9rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.1rem 1.2rem;
+    }
+    .card h3 {
+      font-size: 1.05rem;
+      margin-bottom: .35rem;
+    }
+    .card p { font-size: .98rem; color: var(--muted); }
+
+    .pill {
+      display: inline-block;
+      font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      padding: .2rem .55rem;
+      border-radius: 999px;
+      margin-bottom: .5rem;
+    }
+    .pill.green { background: var(--ok-soft); color: var(--ok); }
+    .pill.amber { background: var(--amber-soft); color: var(--amber); }
+    .pill.red { background: var(--alert-soft); color: var(--alert); }
+    .pill.teal { background: var(--accent-soft); color: var(--accent); }
+    .pill.warn { background: var(--warn-soft); color: var(--warn); }
+
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: .55rem;
+      flex-wrap: wrap;
+    }
+    .flow-step {
+      flex: 1 1 140px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: .9rem;
+      min-width: 120px;
+    }
+    .flow-step .n {
+      font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: .35rem;
+    }
+    .flow-arrow {
+      align-self: center;
+      color: var(--muted);
+      font-size: 1.4rem;
+      flex: 0 0 auto;
+    }
+
+    .pipeline {
+      display: grid;
+      gap: .65rem;
+    }
+    .pipe-row {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 1rem;
+      align-items: start;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: .85rem 1rem;
+    }
+    .pipe-label {
+      font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      font-weight: 700;
+      font-size: .9rem;
+      color: var(--accent);
+    }
+    .pipe-body { font-size: .98rem; color: var(--muted); }
+    .pipe-body strong { color: var(--ink); font-weight: 600; }
+
+    .callout {
+      background: var(--accent-soft);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 12px 12px 0;
+      padding: .9rem 1.1rem;
+      font-size: 1.02rem;
+    }
+    .callout.warn {
+      background: var(--warn-soft);
+      border-left-color: var(--warn);
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .compare .card h3 { font-size: 1.2rem; }
+    .big-num {
+      font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin: .4rem 0;
+    }
+    .big-num.up { color: var(--accent); }
+    .big-num.down { color: var(--alert); }
+
+    ul.clean {
+      list-style: none;
+      display: grid;
+      gap: .55rem;
+    }
+    ul.clean li {
+      padding-left: 1.35rem;
+      position: relative;
+    }
+    ul.clean li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: .55rem;
+      width: .55rem;
+      height: .55rem;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .demo-steps {
+      counter-reset: demo;
+      list-style: none;
+      display: grid;
+      gap: .7rem;
+    }
+    .demo-steps li {
+      counter-increment: demo;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: .85rem 1rem .85rem 3.2rem;
+      position: relative;
+    }
+    .demo-steps li::before {
+      content: counter(demo);
+      position: absolute;
+      left: .85rem;
+      top: .75rem;
+      width: 1.7rem;
+      height: 1.7rem;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      font-weight: 700;
+      font-size: .9rem;
+      display: grid;
+      place-items: center;
+    }
+
+    .title-slide {
+      justify-content: center;
+      background:
+        radial-gradient(ellipse at 85% 15%, rgba(15,107,92,.12), transparent 45%),
+        radial-gradient(ellipse at 10% 90%, rgba(29,78,137,.10), transparent 40%),
+        var(--paper);
+    }
+    .title-slide h1 { max-width: 14ch; font-size: clamp(2.6rem, 5vw, 3.6rem); }
+    .title-slide .lede { font-size: 1.3rem; max-width: 36ch; }
+
+    .nav-hint {
+      position: fixed;
+      bottom: 1rem;
+      right: 1.25rem;
+      font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      font-size: .75rem;
+      color: rgba(255,255,255,.55);
+      z-index: 5;
+    }
+
+    .progress {
+      position: fixed;
+      top: 0; left: 0; height: 3px;
+      background: var(--accent);
+      z-index: 6;
+      transition: width .2s ease;
+    }
+
+    @media (max-width: 800px) {
+      .slide { padding: 1.6rem; min-height: auto; }
+      .grid-2, .grid-3, .grid-4, .compare, .pipe-row {
+        grid-template-columns: 1fr;
+      }
+      .flow-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <div class="nav-hint">← → or click · press F for fullscreen</div>
+
+  <div class="deck" id="deck">
+
+    <!-- 1 -->
+    <section class="slide title-slide active">
+      <div class="eyebrow">Hackathon walkthrough</div>
+      <h1>GoaLPost¹</h1>
+      <p class="lede">
+        An SMS check-in system that notices when someone on a GLP-1 medication
+        is about to drop off — and acts before they disappear.
+      </p>
+      <p class="muted small" style="margin-top:.5rem">
+        Built for care teams. Explained for everyone — no coding required.
+      </p>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">1</span></span>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide">
+      <div class="eyebrow">The problem</div>
+      <h2>Many people start GLP-1 therapy. Too many stop.</h2>
+      <div class="grid-2" style="margin-top:.5rem">
+        <div class="card">
+          <span class="pill warn">Real-world pattern</span>
+          <h3>Dropout is common in the first months</h3>
+          <p>
+            Especially for weight-loss patients. Side effects, stalled weight,
+            insurance/cost surprises, and simply going quiet are the usual reasons.
+          </p>
+        </div>
+        <div class="card">
+          <span class="pill teal">The gap</span>
+          <h3>Care teams can’t text everyone every week</h3>
+          <p>
+            Manual outreach doesn’t scale. Waiting until someone complains means
+            you’ve often already lost them.
+          </p>
+        </div>
+      </div>
+      <div class="callout">
+        <strong>GoaLPost¹’s job:</strong> watch a panel of patients automatically,
+        spot who is drifting, guess <em>why</em>, and either send a helpful text
+        or put a human on the case.
+      </div>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">2</span></span>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide">
+      <div class="eyebrow">What a patient sees</div>
+      <h2>One simple weekly-style check-in</h2>
+      <div class="card" style="max-width:640px">
+        <p style="font-size:1.15rem; color:var(--ink)">
+          “Hi Maria, week 12 check-in from GoaLPost¹. How is your GLP-1 journey going?”
+        </p>
+        <ul class="clean" style="margin-top:1rem">
+          <li><strong>Reply 1</strong> — Going well</li>
+          <li><strong>Reply 2</strong> — Having side effects</li>
+          <li><strong>Reply 3</strong> — Not seeing results</li>
+        </ul>
+      </div>
+      <p class="muted">
+        That’s the entire patient interface. No app to install. The intelligence
+        sits on the care-team side.
+      </p>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">3</span></span>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide">
+      <div class="eyebrow">The big idea</div>
+      <h2>Nobody has to press “Send Check-in”</h2>
+      <p class="lede">
+        One decision engine runs on a schedule. It asks three questions every time:
+      </p>
+      <div class="grid-3">
+        <div class="card">
+          <span class="pill teal">1</span>
+          <h3>Who is due?</h3>
+          <p>Higher risk → contact more often. Lower risk → leave them alone longer.</p>
+        </div>
+        <div class="card">
+          <span class="pill teal">2</span>
+          <h3>How worried are we?</h3>
+          <p>A risk score estimates chance of stopping therapy in the next ~90 days.</p>
+        </div>
+        <div class="card">
+          <span class="pill teal">3</span>
+          <h3>What should we do?</h3>
+          <p>Send a targeted text, escalate to a human, or simply wait until next due.</p>
+        </div>
+      </div>
+      <div class="callout">
+        The same engine powers the live product <strong>and</strong> a months-long
+        simulation — so the demo isn’t a fake parallel story.
+      </div>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">4</span></span>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide">
+      <div class="eyebrow">Pipeline at a glance</div>
+      <h2>From clock tick → action</h2>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="n">Step 1</div>
+          <strong>Clock runs</strong>
+          <p class="small muted">Hourly (or a free cron job on cloud hosting that sleeps)</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="n">Step 2</div>
+          <strong>Pick who’s due</strong>
+          <p class="small muted">Based on their last contact + risk level</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="n">Step 3</div>
+          <strong>Score risk</strong>
+          <p class="small muted">Green / amber / red + likely reason</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="n">Step 4</div>
+          <strong>Apply policy</strong>
+          <p class="small muted">Text and/or create a care-team task</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="n">Step 5</div>
+          <strong>Reschedule</strong>
+          <p class="small muted">Set the next check-in date</p>
+        </div>
+      </div>
+      <p class="muted small">
+        When a patient replies, we skip “who’s due” and jump straight to scoring + policy —
+        then reschedule them with the new risk level.
+      </p>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">5</span></span>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide">
+      <div class="eyebrow">Step 1–2 explained</div>
+      <h2>Who gets contacted, and how often?</h2>
+      <div class="grid-3">
+        <div class="card">
+          <span class="pill green">Green</span>
+          <h3>Every 14 days</h3>
+          <p>Looking stable. Don’t nag.</p>
+        </div>
+        <div class="card">
+          <span class="pill amber">Amber</span>
+          <h3>Every 7 days</h3>
+          <p>Elevated concern. Stay close.</p>
+        </div>
+        <div class="card">
+          <span class="pill red">Red</span>
+          <h3>Every 3 days</h3>
+          <p>High dropout risk. Tight loop.</p>
+        </div>
+      </div>
+      <div class="callout warn">
+        <strong>First 4 weeks override:</strong> nobody waits two weeks early on.
+        Titration (dose ramp-up) is when nausea and early quitters cluster, so the
+        maximum gap is one week regardless of color.
+      </div>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">6</span></span>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide">
+      <div class="eyebrow">Step 3 explained — without the jargon</div>
+      <h2>What is a “risk score”?</h2>
+      <p class="lede">
+        Think of it as a weather forecast for “will this person still be on therapy
+        in ~90 days?” — a number between 0 and 1.
+      </p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>What goes into the forecast</h3>
+          <ul class="clean">
+            <li>How long they’ve been on therapy</li>
+            <li>Whether weight seems stuck (from their reply, for now)</li>
+            <li>Side-effect reports</li>
+            <li>Insurance type &amp; income band</li>
+            <li>How many times they said “not seeing results”</li>
+            <li><strong>How many check-ins they ignored</strong></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>What comes out</h3>
+          <p style="margin-bottom:.8rem"><strong>A probability</strong> → turned into green / amber / red.</p>
+          <p style="margin-bottom:.8rem"><strong>A likely barrier</strong> — the main reason the forecast got worse:</p>
+          <p class="small muted">Plateau · Side effects · Cost</p>
+          <p style="margin-top:1rem" class="small muted">
+            We use a standard prediction model plus an explanation tool (SHAP)
+            that points at which factors mattered most for <em>this</em> patient.
+            You don’t need to know the math — the dashboard shows the conclusion.
+          </p>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">7</span></span>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide">
+      <div class="eyebrow">Step 4 — the playbook</div>
+      <h2>A written clinical policy, not a black box</h2>
+      <p class="muted">Every rule lives in one readable list — a clinician can review it.</p>
+      <div class="pipeline">
+        <div class="pipe-row">
+          <div class="pipe-label">Plateau</div>
+          <div class="pipe-body">Says “not seeing results” and risk is elevated →
+            <strong>encouraging text grounded in published trial evidence</strong>
+            (scale can stall while blood pressure / waist / labs still improve).</div>
+        </div>
+        <div class="pipe-row">
+          <div class="pipe-label">Side effects</div>
+          <div class="pipe-body">Reply 2 → <strong>practical GI guidance</strong>.
+            Two reports in a month → <strong>escalate to care team</strong>.</div>
+        </div>
+        <div class="pipe-row">
+          <div class="pipe-label">Cost</div>
+          <div class="pipe-body">Model flags coverage/cost as the driver →
+            <strong>navigation text</strong> + <strong>benefits-check task</strong> for a human.</div>
+        </div>
+        <div class="pipe-row">
+          <div class="pipe-label">Silence</div>
+          <div class="pipe-body">One missed check-in → <strong>gentle nudge</strong>.
+            Two missed → <strong>outreach call task</strong>.</div>
+        </div>
+        <div class="pipe-row">
+          <div class="pipe-label">Sustained red</div>
+          <div class="pipe-body">Red on two scorings in a row → <strong>nurse call task</strong>.</div>
+        </div>
+        <div class="pipe-row">
+          <div class="pipe-label">Doing well</div>
+          <div class="pipe-body">Reply 1 → short acknowledgment; cadence can stretch out.</div>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">8</span></span>
+      </div>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide">
+      <div class="eyebrow">Trust &amp; safety</div>
+      <h2>Guardrails so the system can’t spam people</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Message limits</h3>
+          <ul class="clean">
+            <li>Max <strong>2 outbound texts per patient per week</strong></li>
+            <li>No duplicate message body within 14 days</li>
+            <li>Only send between <strong>9am and 8pm</strong></li>
+            <li>At most one text per decision pass</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Task limits</h3>
+          <ul class="clean">
+            <li>Don’t open a second task of the same type if one is already open</li>
+            <li>Cooldownoldown after closing — so “still red” doesn’t refill the queue forever</li>
+            <li>Queue is ranked by urgency, then by risk</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout">
+        In a 1,000-patient, 26-week stress test: <strong>zero</strong> weekly-cap
+        violations and <strong>zero</strong> middle-of-the-night texts.
+      </div>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">9</span></span>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide">
+      <div class="eyebrow">The insight that matters most</div>
+      <h2>Silence is a signal — not missing data</h2>
+      <div class="grid-2">
+        <div class="card">
+          <span class="pill warn">Before</span>
+          <h3>Quiet patients looked “fine”</h3>
+          <p>
+            Week counters only moved when someone replied. A person who never
+            answered could sit at “week 0” forever — invisible to risk logic.
+          </p>
+        </div>
+        <div class="card">
+          <span class="pill teal">Now</span>
+          <h3>Non-response raises the alarm</h3>
+          <p>
+            Time on therapy advances from the calendar. Missed check-ins feed the
+            risk score. Sustained silence creates outreach work and can mark
+            someone lost to follow-up.
+          </p>
+        </div>
+      </div>
+      <p class="muted">
+        Clinically this matches intuition: people who stop answering often stop refilling.
+      </p>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">10</span></span>
+      </div>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide">
+      <div class="eyebrow">Care team experience</div>
+      <h2>The dashboard leads with “Needs a human today”</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>1. Work queue</h3>
+          <p>Open tasks ranked by priority and risk. Acknowledge or resolve.</p>
+        </div>
+        <div class="card">
+          <h3>2. Cohort pulse</h3>
+          <p>How many red / amber / green, response rate, retention curve.</p>
+        </div>
+        <div class="card">
+          <h3>3. Patient roster</h3>
+          <p>Filter by tier, silence, status. See who is due next.</p>
+        </div>
+      </div>
+      <div class="callout">
+        Humans only appear when the policy decides their time is worth more than a text.
+        That is the product for a clinic — not another inbox of every SMS.
+      </div>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">11</span></span>
+      </div>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide">
+      <div class="eyebrow">How we proved it</div>
+      <h2>A fair A/B test over virtual months</h2>
+      <div class="compare">
+        <div class="card">
+          <span class="pill amber">Control arm</span>
+          <h3>Prompts only</h3>
+          <p>
+            Patients still get check-in texts and still get scored.
+            Interventions and escalations are turned off.
+          </p>
+        </div>
+        <div class="card">
+          <span class="pill teal">Intervention arm</span>
+          <h3>Full playbook</h3>
+          <p>
+            Same check-ins + plateau / GI / cost messages + care-team tasks.
+          </p>
+        </div>
+      </div>
+      <p style="margin-top:.4rem">
+        Both arms: <strong>1,000 simulated patients</strong>, <strong>26 weeks</strong>,
+        day-by-day, calling the <em>same</em> decision engine as production.
+      </p>
+      <div class="callout warn">
+        <strong>Honest caveat:</strong> how much a text “helps” is an assumption we
+        declare up front. The simulation proves the machinery works at scale —
+        right people, right day, guardrails hold, queue drains.
+        It does <em>not</em> prove clinical effect sizes. Those need a real pilot.
+      </div>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">12</span></span>
+      </div>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide">
+      <div class="eyebrow">Results snapshot</div>
+      <h2>Under our declared assumptions…</h2>
+      <div class="compare">
+        <div class="card">
+          <span class="pill amber">Control</span>
+          <div class="big-num down">40%</div>
+          <p>still marked active at week 26 (what the system can see)</p>
+        </div>
+        <div class="card">
+          <span class="pill teal">Intervention</span>
+          <div class="big-num up">62%</div>
+          <p>still marked active — about <strong>+22 points</strong></p>
+        </div>
+      </div>
+      <div class="grid-3" style="margin-top:.3rem">
+        <div class="card">
+          <h3>Send cap</h3>
+          <p>Max 2 / week · <strong>0 violations</strong></p>
+        </div>
+        <div class="card">
+          <h3>Night texts</h3>
+          <p><strong>0</strong> outside 9am–8pm</p>
+        </div>
+        <div class="card">
+          <h3>Stuck at week 0</h3>
+          <p><strong>0</strong> silent patients frozen</p>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">13</span></span>
+      </div>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide">
+      <div class="eyebrow">Live demo path</div>
+      <h2>What to click when you show this</h2>
+      <ol class="demo-steps">
+        <li><strong>Open the dashboard</strong> — start with the work queue, not the patient table.</li>
+        <li><strong>Acknowledge / resolve a task</strong> — show the human loop.</li>
+        <li><strong>Run scheduler tick</strong> — prove it only contacts people who are due (second click does nothing).</li>
+        <li><strong>Simulate reply “3”</strong> — watch risk, barrier, and the plateau message appear.</li>
+        <li><strong>Optional: reply “2”</strong> — different branch, side-effect guidance.</li>
+        <li><strong>Show simulation chart</strong> — control vs intervention, then state the caveat.</li>
+      </ol>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">14</span></span>
+      </div>
+    </section>
+
+    <!-- 15 -->
+    <section class="slide">
+      <div class="eyebrow">In one breath</div>
+      <h2>What we built</h2>
+      <ul class="clean">
+        <li>An <strong>autonomous check-in schedule</strong> that tightens when risk rises</li>
+        <li>A <strong>risk forecast + reason</strong> (plateau / side effects / cost / silence)</li>
+        <li>A <strong>readable playbook</strong> for texts and human escalation</li>
+        <li><strong>Guardrails</strong> against spam and task overload</li>
+        <li>A <strong>care-team queue</strong> as the clinical product surface</li>
+        <li>A <strong>shared simulator</strong> that stress-tests the real engine</li>
+      </ul>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">15</span></span>
+      </div>
+    </section>
+
+    <!-- 16 -->
+    <section class="slide">
+      <div class="eyebrow">Hackathon Round 2</div>
+      <h2>Where this goes next</h2>
+      <div class="grid-2">
+        <div class="card">
+          <span class="pill teal">Highest leverage</span>
+          <h3>Make it feel real</h3>
+          <ul class="clean">
+            <li>Live SMS (Twilio) on one phone number</li>
+            <li>Tune green/amber/red with a clinician</li>
+            <li>Replace assumed “text helps by X%” with literature or advisor estimates</li>
+            <li>Hook real weight / labs when available (today’s reply is a stand-in)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="pill warn">Then</span>
+          <h3>Path to a pilot</h3>
+          <ul class="clean">
+            <li>Dashboard login + audit trail of who resolved what</li>
+            <li>Pre-register a small clinic endpoint: 90-day persistence</li>
+            <li>Keep the engine; don’t chase fancier models on fake labels</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout">
+        Round 1 proved the <strong>system</strong>. Round 2 should prove
+        <strong>contact with reality</strong> — real messages, clinical cadence, pilot design.
+      </div>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">16</span></span>
+      </div>
+    </section>
+
+    <!-- 17 -->
+    <section class="slide title-slide">
+      <div class="eyebrow">Thank you</div>
+      <h1>Questions?</h1>
+      <p class="lede">
+        Happy to walk the live dashboard, the simulation curve, or Round 2 scope.
+      </p>
+      <div class="grid-3" style="margin-top:1rem; max-width:720px">
+        <div class="card">
+          <h3>Dashboard</h3>
+          <p class="small muted">localhost:8501</p>
+        </div>
+        <div class="card">
+          <h3>API</h3>
+          <p class="small muted">localhost:8000</p>
+        </div>
+        <div class="card">
+          <h3>These slides</h3>
+          <p class="small muted">docs/slides.html</p>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="brand">GoaLPost¹</span>
+        <span>Slide <span class="num">17</span></span>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    const progress = document.getElementById("progress");
+    let i = 0;
+
+    function show(n) {
+      i = (n + slides.length) % slides.length;
+      slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+      progress.style.width = ((i + 1) / slides.length * 100) + "%";
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+        e.preventDefault(); show(i + 1);
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault(); show(i - 1);
+      } else if (e.key === "Home") {
+        show(0);
+      } else if (e.key === "End") {
+        show(slides.length - 1);
+      } else if (e.key === "f" || e.key === "F") {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      }
+    });
+
+    document.getElementById("deck").addEventListener("click", (e) => {
+      if (e.target.closest("a")) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      if (e.clientX - rect.left > rect.width / 2) show(i + 1);
+      else show(i - 1);
+    });
+
+    show(0);
+  </script>
+</body>
+</html>

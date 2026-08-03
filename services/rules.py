@@ -9,6 +9,7 @@ rather than trusting each rule to police itself.
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Callable, Optional
+import os
 
 from sqlalchemy.orm import Session
 
@@ -25,8 +26,9 @@ from services import plateau_messenger, sms_sender
 # Guardrails
 MAX_MESSAGES_PER_WEEK = 2
 DUPLICATE_BODY_WINDOW_DAYS = 14
-SEND_WINDOW_START_HOUR = 9
-SEND_WINDOW_END_HOUR = 20
+# Optional overrides for demos outside business hours, e.g. SEND_WINDOW_END_HOUR=24
+SEND_WINDOW_START_HOUR = int(os.getenv("SEND_WINDOW_START_HOUR", "9"))
+SEND_WINDOW_END_HOUR = int(os.getenv("SEND_WINDOW_END_HOUR", "20"))
 
 # A care team should not get the same patient for the same reason twice in
 # three weeks, even if they already closed the first one. Escalation rules that
@@ -281,6 +283,11 @@ CONTROL_ARM_RULES = {"scheduled_checkin"}
 
 
 def within_send_window(now: datetime) -> bool:
+    """Send window uses the hour on whatever clock the caller passed.
+
+    Live routes should pass local wall-clock time (datetime.now()), not UTC.
+    The simulator already uses virtual wall-clock hours (tick at 10:00).
+    """
     return SEND_WINDOW_START_HOUR <= now.hour < SEND_WINDOW_END_HOUR
 
 

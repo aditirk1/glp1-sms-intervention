@@ -12,6 +12,20 @@ A real clock calls it hourly. The simulator calls it with a fake clock advancing
 
 The demo runs end to end with no paid services: no Twilio, no paid LLM API, and no cloud account requiring a credit card.
 
+## Presentation slides
+
+Non-technical walkthrough of the pipeline, demo path, and Round 2 next steps:
+
+- **PowerPoint:** [`docs/GoaLPost_Walkthrough.pptx`](docs/GoaLPost_Walkthrough.pptx) — open in Keynote / PowerPoint / Google Slides
+- **Browser deck:** `open docs/slides.html` (← → to navigate, **F** for fullscreen)
+
+Rebuild the `.pptx` after edits with:
+
+```bash
+python docs/build_pptx.py
+```
+
+
 ## What the engine does on each tick
 
 ```

@@ -28,7 +28,7 @@ def send_checkin_to_patient(patient_id: int, db: Session = Depends(get_db)):
     if patient is None:
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    now = datetime.utcnow()
+    now = datetime.now()
     weeks = scheduling.refresh_tenure(patient, now)
 
     ctx = rules.RuleContext(

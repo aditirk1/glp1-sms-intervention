@@ -313,7 +313,9 @@ def process_reply(
     Does not commit; the caller owns the transaction so the simulator can batch
     a whole day into one flush.
     """
-    now = now or datetime.utcnow()
+    # Local wall clock: send-window hours are 9–20 in care-team local time.
+    # The simulator always passes an explicit virtual clock instead.
+    now = now or datetime.now()
 
     weeks = refresh_tenure(patient, now)
     consecutive_reply_3 = count_consecutive_reply_3(db, patient.id, reply)
@@ -443,7 +445,9 @@ def run_due_checkins(
     Refreshes tenure, converts unanswered prompts into a silence signal,
     re-scores, applies the policy and reschedules. Does not commit.
     """
-    now = now or datetime.utcnow()
+    # Local wall clock: send-window hours are 9–20 in care-team local time.
+    # The simulator always passes an explicit virtual clock instead.
+    now = now or datetime.now()
     result = TickResult(ran_at=now)
 
     patients = due_patients(db, now, limit=limit)
@@ -532,7 +536,9 @@ def run_due_checkins(
 
 def tick(db: Session, now: Optional[datetime] = None, arm: str = "intervention") -> dict:
     """Run a tick and commit it. The API and APScheduler entry point."""
-    now = now or datetime.utcnow()
+    # Local wall clock: send-window hours are 9–20 in care-team local time.
+    # The simulator always passes an explicit virtual clock instead.
+    now = now or datetime.now()
     try:
         result = run_due_checkins(now=now, db=db, arm=arm)
         db.commit()
