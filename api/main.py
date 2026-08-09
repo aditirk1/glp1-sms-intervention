@@ -21,7 +21,7 @@ load_dotenv()
 
 # The in-process scheduler is convenient locally and unreliable on hosts that
 # sleep idle instances, so it can be turned off in favour of external cron.
-ENABLE_SCHEDULER = os.getenv("ENABLE_SCHEDULER", "true").lower() in ("1", "true", "yes")
+ENABLE_SCHEDULER = os.getenv("ENABLE_SCHEDULER", "false").lower() in ("1", "true", "yes")
 SCHEDULER_INTERVAL_MINUTES = int(os.getenv("SCHEDULER_INTERVAL_MINUTES", "60"))
 
 _scheduler = None

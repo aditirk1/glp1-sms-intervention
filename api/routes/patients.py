@@ -155,7 +155,7 @@ def list_patients(
         query = query.filter(
             Patient.status == STATUS_ACTIVE,
             Patient.next_checkin_due.isnot(None),
-            Patient.next_checkin_due <= datetime.utcnow(),
+            Patient.next_checkin_due <= datetime.now(),
         )
     if search:
         query = query.filter(Patient.name.ilike(f"%{search.strip()}%"))
@@ -211,7 +211,11 @@ def create_patient(payload: PatientCreate, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="Phone number already enrolled")
 
-    now = datetime.utcnow()
+    now = datetime.now()
+    therapy_start = payload.therapy_start_date or now
+    # Keep the denormalized week counter honest at enroll so the roster does
+    # not show week 0 for someone already mid-treatment.
+    weeks = max(0, (now - therapy_start).days // 7)
     patient = Patient(
         name=payload.name.strip(),
         phone_number=phone_number,
@@ -219,13 +223,13 @@ def create_patient(payload: PatientCreate, db: Session = Depends(get_db)):
         insurance_type=payload.insurance_type,
         income_quintile=payload.income_quintile,
         baseline_bmi=payload.baseline_bmi,
-        weeks_on_therapy=0,
+        weeks_on_therapy=weeks,
         enrolled_at=now,
         active=True,
         status=STATUS_ACTIVE,
         # Tenure is derived from this from here on, so a patient who never
         # replies still ages instead of sitting at week 0 forever.
-        therapy_start_date=payload.therapy_start_date or now,
+        therapy_start_date=therapy_start,
         # A null due date makes the next tick pick them up immediately.
         next_checkin_due=None,
     )

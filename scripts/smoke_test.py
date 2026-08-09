@@ -102,10 +102,22 @@ def main() -> None:
             if body.get("sent"):
                 sent += 1
         messages = client.get(f"/patients/{patient['id']}").json()["outbound_messages"]
+        outreach = [m for m in messages if m.get("kind") != "acknowledgement"]
         check(
-            "no more than 2 messages in the week",
-            len(messages) <= 2,
-            f"{len(messages)} messages, {sent} manual sends accepted",
+            "no more than 2 outreach messages in the week",
+            len(outreach) <= 2,
+            f"{len(outreach)} outreach / {len(messages)} total, {sent} manual sends accepted",
+        )
+
+        # Reply 1 must still get an acknowledgement even at the outreach cap.
+        ack = client.post(
+            "/webhook/sms", data={"From": "+15550001111", "Body": "1"}
+        ).json()
+        check(
+            "acknowledgement bypasses weekly cap",
+            ack.get("intervention_fired") == "doing_well"
+            and bool(ack.get("intervention_message")),
+            str(ack)[:160],
         )
 
         print("\nfilters and pagination")

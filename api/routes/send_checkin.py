@@ -50,7 +50,11 @@ def send_checkin_to_patient(patient_id: int, db: Session = Depends(get_db)):
 
     try:
         result = rules.apply_actions(db, ctx, [action])
-        scheduling.schedule_next(patient, now, patient.current_risk_tier)
+        # Only advance cadence when a message actually went out. Otherwise a
+        # suppressed manual send would push next_checkin_due forward and the
+        # patient would be skipped by the next real tick.
+        if result.sent_body is not None:
+            scheduling.schedule_next(patient, now, patient.current_risk_tier)
         db.commit()
     except Exception as exc:
         db.rollback()

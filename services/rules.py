@@ -14,6 +14,7 @@ import os
 from sqlalchemy.orm import Session
 
 from db.models import (
+    KIND_ACKNOWLEDGEMENT,
     PROMPT_KINDS,
     TASK_ACKNOWLEDGED,
     TASK_OPEN,
@@ -124,7 +125,11 @@ RULES: list[Rule] = [
         id="red_sustained",
         name="Sustained red risk",
         priority=100,
-        when=lambda c: c.sustained_red and c.risk_tier == "red",
+        # Do not escalate on an explicit "going well" reply — that confuses the
+        # demo and fights the acknowledgement the patient just earned.
+        when=lambda c: (
+            c.sustained_red and c.risk_tier == "red" and c.reply != 1
+        ),
         actions=lambda c: [
             Action(
                 rule_id="red_sustained",
@@ -162,25 +167,40 @@ RULES: list[Rule] = [
         id="cost_barrier",
         name="Cost barrier detected",
         priority=80,
-        when=lambda c: c.barrier_type == "cost" and c.risk_tier in ("amber", "red"),
-        actions=lambda c: [
-            Action(
-                rule_id="cost_barrier",
-                kind="sms",
-                priority=80,
-                body=COST_MESSAGE,
-            ),
-            Action(
-                rule_id="cost_barrier",
-                kind="task",
-                priority=70,
-                task_kind="benefits_check",
-                reason=(
-                    f"Cost attributed as the dominant barrier at risk "
-                    f"{c.risk_score:.2f} ({c.patient.insurance_type})."
-                ),
-            ),
-        ],
+        # Never override an explicit "going well" reply. On a scheduled tick
+        # (reply is None) raise a benefits task only — the 1/2/3 prompt must
+        # still go out, otherwise cost patients never get a check-in question.
+        when=lambda c: (
+            c.barrier_type == "cost"
+            and c.risk_tier in ("amber", "red")
+            and c.reply != 1
+        ),
+        actions=lambda c: (
+            (
+                [
+                    Action(
+                        rule_id="cost_barrier",
+                        kind="sms",
+                        priority=80,
+                        body=COST_MESSAGE,
+                    )
+                ]
+                if c.reply is not None
+                else []
+            )
+            + [
+                Action(
+                    rule_id="cost_barrier",
+                    kind="task",
+                    priority=70,
+                    task_kind="benefits_check",
+                    reason=(
+                        f"Cost attributed as the dominant barrier at risk "
+                        f"{c.risk_score:.2f} ({c.patient.insurance_type})."
+                    ),
+                )
+            ]
+        ),
         cooldown_days=21,
     ),
     Rule(
@@ -304,11 +324,18 @@ def evaluate(ctx: RuleContext) -> list:
 
 
 def _messages_last_7_days(db: Session, patient_id: int, now: datetime) -> int:
+    """Count outreach that should burn the weekly budget.
+
+    Short acknowledgements for reply 1 do not count. Otherwise a routine prompt
+    plus one intervention would block the "going well" ack and the demo looks
+    broken.
+    """
     return (
         db.query(OutboundMessage)
         .filter(
             OutboundMessage.patient_id == patient_id,
             OutboundMessage.sent_at > now - timedelta(days=7),
+            OutboundMessage.kind != KIND_ACKNOWLEDGEMENT,
         )
         .count()
     )
@@ -426,7 +453,10 @@ def apply_actions(
             if result.sent_body is not None:
                 result.suppressed.append((action.rule_id, "one message per evaluation"))
                 continue
-            if weekly_count >= MAX_MESSAGES_PER_WEEK:
+            # Short "going well" acks must not be blocked by the outreach budget;
+            # a prompt + intervention earlier in the week is a normal path.
+            burns_budget = action.message_kind != KIND_ACKNOWLEDGEMENT
+            if burns_budget and weekly_count >= MAX_MESSAGES_PER_WEEK:
                 result.suppressed.append((action.rule_id, "weekly cap"))
                 continue
             if not within_send_window(now):
@@ -466,7 +496,9 @@ def apply_actions(
             patient.last_contacted_at = now
             if action.message_kind in PROMPT_KINDS:
                 patient.last_prompt_at = now
-            weekly_count += 1
+            # Acknowledgements do not burn the weekly outreach budget.
+            if action.message_kind != KIND_ACKNOWLEDGEMENT:
+                weekly_count += 1
             result.sent_body = body
             result.sent_rule_id = action.rule_id
 

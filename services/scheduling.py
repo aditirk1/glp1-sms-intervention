@@ -364,12 +364,12 @@ def process_reply(
     )
     applied = rules.apply_actions(db, ctx, rules.evaluate(ctx), arm=arm)
 
+    parts = []
     if applied.sent_rule_id:
-        intervention_fired = applied.sent_rule_id
-    elif applied.tasks_created:
-        intervention_fired = f"task:{applied.tasks_created[0]}"
-    else:
-        intervention_fired = "none"
+        parts.append(applied.sent_rule_id)
+    for task_kind in applied.tasks_created:
+        parts.append(f"task:{task_kind}")
+    intervention_fired = "+".join(parts) if parts else "none"
 
     check_in.risk_score = float(scored["risk_score"])
     check_in.barrier_type = scored["barrier_type"]

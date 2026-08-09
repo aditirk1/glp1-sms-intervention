@@ -85,7 +85,7 @@ def _retention_curve(patients: list, now: datetime) -> list:
 @router.get("/cohort/metrics")
 def cohort_metrics(db: Session = Depends(get_db)):
     """Everything the dashboard header and charts need, in one call."""
-    now = datetime.utcnow()
+    now = datetime.now()
     patients = db.query(Patient).all()
     total = len(patients)
 

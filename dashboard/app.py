@@ -253,10 +253,10 @@ if len(sim.get("available", [])) >= 1:
                 "Arm": arm,
                 "Patients": payload.get("patients"),
                 "Weeks": payload.get("weeks"),
-                "Retention": totals.get("final_retention"),
+                "Retention %": round(100 * (totals.get("final_retention") or 0), 1),
                 "On therapy (truth)": truth.get("on_therapy"),
                 "Msgs / patient": totals.get("messages_per_patient"),
-                "Response rate": totals.get("response_rate"),
+                "Response rate %": round(100 * (totals.get("response_rate") or 0), 1),
                 "Tasks": totals.get("tasks_created"),
                 "Max msgs / 7d": guards.get("max_messages_in_any_7_days"),
                 "Cap violations": guards.get("cap_violations"),
@@ -268,8 +268,8 @@ if len(sim.get("available", [])) >= 1:
             hide_index=True,
             width="stretch",
             column_config={
-                "Retention": st.column_config.NumberColumn(format="%.1f%%"),
-                "Response rate": st.column_config.NumberColumn(format="%.1f%%"),
+                "Retention %": st.column_config.NumberColumn(format="%.1f"),
+                "Response rate %": st.column_config.NumberColumn(format="%.1f"),
             },
         )
 
@@ -453,6 +453,19 @@ with st.expander("Simulate an inbound reply"):
                     if result.get("intervention_message"):
                         st.markdown("**Sent to patient:**")
                         st.info(result["intervention_message"])
+                    else:
+                        suppressed = result.get("suppressed") or []
+                        if suppressed or result.get("intervention_fired") == "none":
+                            reasons = ", ".join(
+                                f"{s['rule']} ({s['reason']})" for s in suppressed
+                            ) or "no matching send"
+                            st.warning(
+                                "No SMS was sent. "
+                                f"Guardrails or policy blocked it: {reasons}. "
+                                "Common causes: weekly cap (max 2 outreach texts / 7 days; "
+                                "acknowledgements do not count), "
+                                "outside 9am–8pm local time, or cooldown."
+                            )
                     if result.get("tasks_created"):
                         st.warning(
                             "Task raised: "
@@ -461,17 +474,24 @@ with st.expander("Simulate an inbound reply"):
                                 for k in result["tasks_created"]
                             )
                         )
-                    if result.get("suppressed"):
+                    if result.get("suppressed") and result.get("intervention_message"):
                         st.caption(
-                            "Suppressed by guardrails: "
+                            "Also suppressed: "
                             + ", ".join(
                                 f"{s['rule']} ({s['reason']})"
                                 for s in result["suppressed"]
                             )
                         )
+                    shap = result.get("top_shap_feature") or "-"
+                    if shap == "unavailable":
+                        st.error(
+                            "Risk model fell back to a neutral score "
+                            "(SHAP unavailable). Check the API console for "
+                            "XGBoost / OpenMP errors, then restart uvicorn."
+                        )
                     st.caption(
-                        f"Top SHAP feature: `{result.get('top_shap_feature', '-')}` · "
-                        f"next check-in {result.get('next_checkin_due', '—')}"
+                        f"Top SHAP feature: `{shap}` · "
+                        f"next check-in {result.get('next_checkin_due', '-')}"
                     )
             elif response is not None:
                 st.error(f"API error: {response.status_code}")
