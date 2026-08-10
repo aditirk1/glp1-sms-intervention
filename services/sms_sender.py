@@ -1,4 +1,4 @@
-"""SMS transport for GoaLPost¹.
+"""SMS transport for GoaLPost-1.
 
 The demo build is a logging simulator: messages are printed rather than sent,
 so the whole pipeline runs with no Twilio account and no carrier fees. Swapping
@@ -31,7 +31,7 @@ def send_sms(to_number: str, message: str) -> str:
     if _quiet:
         return message
     try:
-        logger.info(f"[GoaLPost¹ SMS] To: {to_number} | {message}")
+        logger.info(f"[GoaLPost-1 SMS] To: {to_number} | {message}")
     except Exception as exc:
         print(f"[sms_sender] logging failed ({exc})")
     return message
@@ -40,7 +40,7 @@ def send_sms(to_number: str, message: str) -> str:
 def build_checkin_message(patient_name: str, week: int) -> str:
     """The weekly 1/2/3 prompt body, without sending it."""
     return (
-        f"Hi {patient_name}, week {week} check-in from GoaLPost¹. "
+        f"Hi {patient_name}, week {week} check-in from GoaLPost-1. "
         f"How is your GLP-1 journey going? "
         f"Reply 1 - Going well "
         f"Reply 2 - Having side effects "
