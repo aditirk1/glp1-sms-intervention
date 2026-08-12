@@ -166,8 +166,6 @@ codesign -f -s - "$SP/xgboost/lib/libxgboost.dylib"
 
 ## Running the demo
 
-Full speakable script (setup, ~2 min walkthrough, cheat sheet): **`docs/DEMO_SCRIPT.md`**.
-
 1. Bootstrap the live panel: `python -m simulation.bootstrap_live --weeks 13`
 2. Open the dashboard at http://localhost:8501. It leads with **Needs a human today** — the work queue the rules engine produced.
 2. Press **Run scheduler tick** under Controls. It contacts only the patients whose cadence has come due, so pressing it twice does nothing the second time. That is the point.
