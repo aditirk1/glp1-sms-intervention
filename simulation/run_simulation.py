@@ -69,7 +69,11 @@ def _retention_series(weekly: list, key: str) -> list:
     return [round(row[key], 4) for row in weekly]
 
 
-def run(args: argparse.Namespace) -> dict:
+def run(
+    args: argparse.Namespace,
+    origin: datetime | None = None,
+    write_json: bool = True,
+) -> dict:
     # Imported here so DATABASE_URL is already pointed at this arm's file.
     from db.database import SessionLocal
     from db.models import (
@@ -90,7 +94,7 @@ def run(args: argparse.Namespace) -> dict:
     sms_sender.set_quiet(args.quiet)
     plateau_messenger.set_offline(True)
 
-    origin = datetime(2025, 1, 6, TICK_HOUR, 0, 0)
+    origin = origin or datetime(2025, 1, 6, TICK_HOUR, 0, 0)
     days = args.weeks * 7
 
     print(f"[{args.arm}] seeding {args.patients} patients...")
@@ -267,11 +271,12 @@ def run(args: argparse.Namespace) -> dict:
             "ground_truth": truth,
         }
 
-        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-        out_path = RESULTS_DIR / f"{args.arm}.json"
-        with open(out_path, "w", encoding="utf-8") as handle:
-            json.dump(summary, handle, indent=2)
-        print(f"[{args.arm}] wrote {out_path}")
+        if write_json:
+            RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+            out_path = RESULTS_DIR / f"{args.arm}.json"
+            with open(out_path, "w", encoding="utf-8") as handle:
+                json.dump(summary, handle, indent=2)
+            print(f"[{args.arm}] wrote {out_path}")
 
         return summary
     finally:

@@ -33,6 +33,48 @@ RESULTS_DIR = PROJECT_ROOT / "simulation" / "results"
 
 MAX_CURVE_WEEKS = 78
 
+TENURE_BUCKETS = (
+    ("0–12 wks since enroll", 0, 12),
+    ("13–26 wks", 13, 26),
+    ("27–39 wks", 27, 39),
+    ("40+ wks", 40, 9999),
+)
+
+
+def _weeks_since_enrollment(patient: Patient, now: datetime) -> int | None:
+    if patient.enrolled_at is None:
+        return None
+    return max(0, (now - patient.enrolled_at).days // 7)
+
+
+def _retention_by_tenure(patients: list, now: datetime) -> list:
+    """Share still active within each enrollment-age bucket.
+
+    Every patient sits in exactly one bucket, so these bars sum to the cohort
+    and align with the headline retention KPI — unlike the Kaplan–Meier curve.
+    """
+    rows = []
+    for label, low, high in TENURE_BUCKETS:
+        group = [
+            p
+            for p in patients
+            if (weeks := _weeks_since_enrollment(p, now)) is not None
+            and low <= weeks <= high
+        ]
+        if not group:
+            continue
+        active = sum(1 for p in group if p.status == STATUS_ACTIVE)
+        total = len(group)
+        rows.append(
+            {
+                "bucket": label,
+                "total": total,
+                "active": active,
+                "retention": round(active / total, 4),
+            }
+        )
+    return rows
+
 
 def _retention_curve(patients: list, now: datetime) -> list:
     """Fraction of the cohort still active at each week since enrollment.
@@ -161,6 +203,7 @@ def cohort_metrics(db: Session = Depends(get_db)):
             "active": statuses.get(STATUS_ACTIVE, 0),
             "discontinued": statuses.get(STATUS_DISCONTINUED, 0),
             "rate": round(statuses.get(STATUS_ACTIVE, 0) / total, 4) if total else None,
+            "by_tenure": _retention_by_tenure(patients, now),
             "curve": _retention_curve(patients, now),
         },
         "engagement": {

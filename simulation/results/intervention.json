@@ -3,7 +3,7 @@
   "patients": 1000,
   "weeks": 26,
   "seed": 11,
-  "runtime_seconds": 60.2,
+  "runtime_seconds": 59.8,
   "weekly": [
     {
       "week": 1,

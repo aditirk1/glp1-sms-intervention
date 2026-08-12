@@ -1,8 +1,8 @@
 [theme]
 base = "light"
 primaryColor = "#0093D0"
-backgroundColor = "#F0F6FF"
-secondaryBackgroundColor = "#E4ECFF"
+backgroundColor = "#EAF3FF"
+secondaryBackgroundColor = "#F4EFFF"
 textColor = "#0B1B3F"
 font = "sans serif"
 
@@ -14,3 +14,4 @@ gatherUsageStats = false
 
 [client]
 toolbarMode = "minimal"
+showSidebarNavigation = false

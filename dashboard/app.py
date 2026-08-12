@@ -8,7 +8,7 @@ from styles import inject_theme, render_chrome
 
 st.set_page_config(
     page_title="GoaLPost-1",
-    page_icon=":material/vital_signs:",
+    page_icon=str(Path(__file__).parent / "assets" / "goalpost1-logo-circle.png"),
     layout="wide",
     initial_sidebar_state="collapsed",
 )

@@ -166,13 +166,24 @@ codesign -f -s - "$SP/xgboost/lib/libxgboost.dylib"
 
 ## Running the demo
 
-1. Open the dashboard at http://localhost:8501. It leads with **Needs a human today** — the work queue the rules engine produced.
+Full speakable script (setup, ~2 min walkthrough, cheat sheet): **`docs/DEMO_SCRIPT.md`**.
+
+1. Bootstrap the live panel: `python -m simulation.bootstrap_live --weeks 13`
+2. Open the dashboard at http://localhost:8501. It leads with **Needs a human today** — the work queue the rules engine produced.
 2. Press **Run scheduler tick** under Controls. It contacts only the patients whose cadence has come due, so pressing it twice does nothing the second time. That is the point.
 3. Open **Simulate an inbound reply**, pick a patient, and answer **3 — Not seeing results**. Watch the risk score, the SHAP-attributed barrier, which rule fired, and any task it raised.
 4. Acknowledge or resolve a task in the queue.
 5. Filter the roster by **Silent only** to see patients who are accruing risk without ever replying.
 
 Every outbound message is printed to the API console with a `[GoaLPost¹ SMS]` prefix rather than sent, so you can watch the whole conversation without a carrier.
+
+**Bootstrap the live panel mid-simulation** (recommended for demos — populates messages, tasks, risk scores, and retention in `GoaLPost¹.db` without waiting for real time):
+
+```bash
+python -m simulation.bootstrap_live --weeks 13
+```
+
+Virtual time ends near today, so Overview retention aligns with wall clock. Outcomes still reads the separate 26-week experiment JSON; this only fills the live dashboard database.
 
 ## The simulation harness
 
@@ -185,7 +196,7 @@ python -m simulation.run_simulation --arm intervention --patients 1000 --weeks 2
 
 Each arm writes its own SQLite file and a JSON summary under `simulation/results/`, which the dashboard reads through `GET /simulation/results`. A 1000-patient, 26-week run takes about a minute.
 
-- `seed_cohort.py` staggers `therapy_start_date` so the cohort spans weeks 1-52 rather than everyone starting today.
+- `seed_cohort.py` staggers `enrolled_at` and `therapy_start_date` so the cohort spans weeks 1–52 rather than everyone enrolling today, and scores baseline risk from demographics and tenure.
 - `patient_behavior.py` gives each patient a latent state the system cannot observe (well, plateau, GI, cost), a reply probability that decays with tenure and risk, a weekly quit hazard, and a 6% slice who go permanently silent. Replies are sampled, not scripted.
 - The **control arm still receives cadence prompts and is still scored**. Only the interventions are suppressed, so the comparison isolates acting on the risk signal from merely being contacted.
 
