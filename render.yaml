@@ -1,0 +1,38 @@
+# Public "app" = dashboard URL. API is the backend it talks to.
+# Vercel cannot host Streamlit/FastAPI (they are long-running servers).
+#
+# https://dashboard.render.com/select-repo?type=blueprint
+
+services:
+  - type: web
+    name: goalpost-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: ENABLE_SCHEDULER
+        value: "false"
+      - key: GROQ_API_KEY
+        sync: false
+
+  - type: web
+    name: goalpost-dashboard
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: >-
+      streamlit run dashboard/app.py
+      --server.port $PORT
+      --server.address 0.0.0.0
+      --server.headless true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: API_BASE_URL
+        fromService:
+          type: web
+          name: goalpost-api
+          envVarKey: RENDER_EXTERNAL_URL

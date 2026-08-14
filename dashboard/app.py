@@ -33,9 +33,9 @@ patients = st.Page(
     title="Patients",
     icon=":material/groups:",
 )
-outcomes = st.Page(
+demo_simulation = st.Page(
     PAGES / "outcomes.py",
-    title="Outcomes",
+    title="Demo simulation",
     icon=":material/monitoring:",
 )
 operations = st.Page(
@@ -44,21 +44,27 @@ operations = st.Page(
     icon=":material/tune:",
 )
 
-# Hide Streamlit's default top tabs — we render an elegant branded nav instead.
-page = st.navigation(
-    [overview, work_queue, patients, outcomes, operations],
-    position="hidden",
-)
+# Default on so the demo script still finds the tab; uncheck "Sim" to hide it.
+if "show_demo_sim" not in st.session_state:
+    st.session_state.show_demo_sim = True
 
-render_chrome(
-    [
-        (overview, "Overview", ":material/dashboard:"),
-        (work_queue, "Work queue", ":material/assignment:"),
-        (patients, "Patients", ":material/groups:"),
-        (outcomes, "Outcomes", ":material/monitoring:"),
-        (operations, "Operations", ":material/tune:"),
-    ],
-    active=page,
-)
+nav_pages = [overview, work_queue, patients]
+nav_labels = [
+    (overview, "Overview", ":material/dashboard:"),
+    (work_queue, "Work queue", ":material/assignment:"),
+    (patients, "Patients", ":material/groups:"),
+]
+if st.session_state.show_demo_sim:
+    nav_pages.append(demo_simulation)
+    nav_labels.append(
+        (demo_simulation, "Demo simulation", ":material/monitoring:")
+    )
+nav_pages.append(operations)
+nav_labels.append((operations, "Operations", ":material/tune:"))
+
+# Hide Streamlit's default top tabs — we render an elegant branded nav instead.
+page = st.navigation(nav_pages, position="hidden")
+
+render_chrome(nav_labels, active=page)
 
 page.run()

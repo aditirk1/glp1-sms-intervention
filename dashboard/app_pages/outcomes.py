@@ -8,9 +8,9 @@ from styles import page_header, page_shell
 
 with page_shell():
     page_header(
-        "Outcomes",
+        "Demo simulation",
         "Pre-computed 26-week experiment (control vs intervention). "
-        "This is not the live patient panel: DEMO Purpose Only",
+        "Not the live patient panel — demo only.",
     )
 
     sim = api_get("/simulation/results") or {"available": [], "results": {}}

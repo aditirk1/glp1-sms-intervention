@@ -100,7 +100,7 @@ with page_shell():
 
             st.caption(
                 "For the controlled 26-week intervention vs control experiment, "
-                "open **Outcomes** — that cohort all enrolled on the same day."
+                "open **Demo simulation** — that cohort all enrolled on the same day."
             )
 
     st.write("")

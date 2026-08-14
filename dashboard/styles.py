@@ -622,6 +622,36 @@ button[data-testid="stBaseButton-secondary"] {
 hr {
   border-color: rgba(0, 94, 184, 0.12) !important;
 }
+
+/* Tiny show/hide for Demo simulation — under header, right-aligned, quiet */
+.st-key-gp_sim_toggle {
+  display: flex !important;
+  justify-content: flex-end !important;
+  margin: -0.35rem 1.5rem 0.15rem 0 !important;
+  padding: 0 !important;
+  opacity: 0.4;
+  transition: opacity 0.15s ease;
+}
+.st-key-gp_sim_toggle:hover {
+  opacity: 1;
+}
+.st-key-gp_sim_toggle [data-testid="stHorizontalBlock"] {
+  justify-content: flex-end !important;
+  gap: 0 !important;
+}
+.st-key-gp_sim_toggle [data-testid="stCheckbox"] {
+  min-height: 0 !important;
+}
+.st-key-gp_sim_toggle [data-testid="stCheckbox"] label,
+.st-key-gp_sim_toggle [data-testid="stCheckbox"] label p,
+.st-key-gp_sim_toggle [data-testid="stCheckbox"] label span {
+  font-size: 0.72rem !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+}
+.st-key-gp_sim_toggle [data-testid="stWidgetLabel"] {
+  display: none !important;
+}
 </style>
 """
 
@@ -637,7 +667,10 @@ def inject_theme() -> None:
     st.markdown(_THEME_CSS + logo_css, unsafe_allow_html=True)
 
 
-def render_chrome(nav_items: list[tuple], active=None) -> None:
+def render_chrome(
+    nav_items: list[tuple],
+    active=None,
+) -> None:
     """Full-bleed brand bar flush to the top of the viewport."""
     with st.container(key="gp_chrome"):
         st.markdown(
@@ -665,6 +698,16 @@ def render_chrome(nav_items: list[tuple], active=None) -> None:
                 key = f"nav_{slug}_on" if is_on else f"nav_{slug}"
                 with st.container(key=key):
                     st.page_link(page, label=label, icon=icon, width="stretch")
+
+    # Outside the dark chrome so overflow/clipping does not swallow it.
+    with st.container(key="gp_sim_toggle"):
+        _spacer, toggle_col = st.columns([0.88, 0.12])
+        with toggle_col:
+            st.checkbox(
+                "Sim",
+                key="show_demo_sim",
+                help="Show or hide the Demo simulation tab",
+            )
 
 
 def page_shell():

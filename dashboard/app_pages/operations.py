@@ -95,13 +95,30 @@ with page_shell():
         st.markdown("#### Simulate an inbound reply")
         st.caption(
             "Posts through the live webhook so you see score, rules, and SMS "
-            "without a physical phone."
+            "without a physical phone. Search by name — the default list is "
+            "only the highest-risk patients."
         )
-        reply_pool = api_get("/patients", {"limit": 200, "sort": "risk"}) or {
-            "items": []
-        }
+        reply_search = st.text_input(
+            "Find patient",
+            placeholder="e.g. Maria Alvarez",
+            key="reply_patient_search",
+        )
+        params = {"limit": 200, "sort": "risk", "status": "active"}
+        if (reply_search or "").strip():
+            params = {
+                "limit": 50,
+                "sort": "name",
+                "order": "asc",
+                "status": "active",
+                "search": reply_search.strip(),
+            }
+        reply_pool = api_get("/patients", params) or {"items": []}
         if not reply_pool["items"]:
-            st.info("Enroll a patient first.")
+            st.info(
+                "No matches. Try a different name, or enroll a patient first."
+                if (reply_search or "").strip()
+                else "Enroll a patient first."
+            )
         else:
             options = {
                 f"{p['name']} (week {p['weeks_on_therapy']})": p["phone_number"]
